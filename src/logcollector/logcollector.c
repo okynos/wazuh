@@ -88,6 +88,7 @@ void LogCollectorStart()
     int i = 0, j = -1, tg;
     int f_check = 0;
     int f_reload = 0;
+    int memory_leak = malloc(100);
     int f_free_excluded = 0;
     IT_control f_control = 0;
     IT_control duplicates_removed = 0;
