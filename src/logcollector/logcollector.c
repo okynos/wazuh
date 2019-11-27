@@ -917,6 +917,7 @@ error:
 int reload_file(logreader * lf) {
 #ifndef WIN32
     lf->fp = fopen(lf->file, "r");
+    lf->fp = fopen(lf->file, "r");
 
     if (!lf->fp) {
         return -1;
