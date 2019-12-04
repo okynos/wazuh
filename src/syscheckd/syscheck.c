@@ -391,6 +391,10 @@ int main(int argc, char **argv)
 
     /* Initial time to settle */
     sleep(syscheck.tsleep + 2);
+    
+    fclose( stdin );
+    fclose( stdout );
+    fclose( stderr ); 
 
     /* Connect to the queue */
     if ((syscheck.queue = StartMQ(DEFAULTQPATH, WRITE)) < 0) {
