@@ -150,7 +150,7 @@ int os_string(char *file, char *regex)
     unsigned char *bfr;
     char line[OS_SIZE_1024 + 1];
     char *buf;
-    EXEC *head = NULL;
+    EXEC *head;
     os_strings oss;
 
     /* Return didn't match */

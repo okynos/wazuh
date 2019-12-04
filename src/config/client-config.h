@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CAGENTD_H
-#define CAGENTD_H
+#ifndef __CAGENTD_H
+#define __CAGENTD_H
 
 typedef struct agent_flags_t {
     unsigned int auto_restart:1;
@@ -45,11 +45,4 @@ typedef struct _agent {
 /* Frees the Client struct  */
 void Free_Client(agent * config);
 
-/**
- * @brief Check if address has default values
- * @param servers Server(s) configuration block in agent ossec.conf
- * @return Returns true if successful and false if not success
- */
-bool Validate_Address(agent_server *servers);
-
-#endif /* CAGENTD_H */
+#endif /* __CAGENTD_H */

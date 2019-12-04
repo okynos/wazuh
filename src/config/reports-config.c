@@ -116,11 +116,20 @@ int Read_CReports(XML_NODE node, void *config, __attribute__((unused)) void *con
                 mon_config->reports[s]->r_filter.show_alerts = 1;
             }
         } else if (strcmp(node[i]->element, xml_categories) == 0) {
+            char *ncat = NULL;
+            int result;
+
             _filter_arg(node[i]->content);
 
-            if (os_report_configfilter("group", node[i]->content,
-                                       &mon_config->reports[s]->r_filter, REPORT_FILTER)) {
+            os_strdup(node[i]->content, ncat);
+
+            if (result = os_report_configfilter("group", ncat,
+                                       &mon_config->reports[s]->r_filter, REPORT_FILTER), result < 0) {
                 merror(CONFIG_ERROR, "user argument");
+            }
+
+            if (result < 0 || result == 1) {
+                free(ncat);
             }
         } else if ((strcmp(node[i]->element, xml_group) == 0) ||
                    (strcmp(node[i]->element, xml_rule) == 0) ||
@@ -128,7 +137,9 @@ int Read_CReports(XML_NODE node, void *config, __attribute__((unused)) void *con
                    (strcmp(node[i]->element, xml_location) == 0) ||
                    (strcmp(node[i]->element, xml_srcip) == 0) ||
                    (strcmp(node[i]->element, xml_user) == 0)) {
+            int result;
             int reportf = REPORT_FILTER;
+            char *ncat = NULL;
             _filter_arg(node[i]->content);
 
             if (node[i]->attributes && node[i]->values) {
@@ -149,9 +160,15 @@ int Read_CReports(XML_NODE node, void *config, __attribute__((unused)) void *con
                 }
             }
 
-            if (os_report_configfilter(node[i]->element, node[i]->content,
-                                       &mon_config->reports[s]->r_filter, reportf)) {
+            os_strdup(node[i]->content, ncat);
+
+            if (result = os_report_configfilter(node[i]->element, ncat,
+                                       &mon_config->reports[s]->r_filter, reportf), result < 0) {
                 merror("Invalid filter: %s:%s (ignored).", node[i]->element, node[i]->content);
+            }
+
+            if (result < 0 || result == 1) {
+                free(ncat);
             }
         } else if (strcmp(node[i]->element, xml_email) == 0) {
             mon_config->reports[s]->emailto = os_AddStrArray(node[i]->content, mon_config->reports[s]->emailto);

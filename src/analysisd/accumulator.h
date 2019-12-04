@@ -8,8 +8,8 @@
  * Foundation.
 */
 
-#ifndef ACCUMULATOR_H
-#define ACCUMULATOR_H
+#ifndef __ACCUMULATOR_H
+#define __ACCUMULATOR_H
 
 #include "eventinfo.h"
 
@@ -18,4 +18,5 @@ int Accumulate_Init(void);
 Eventinfo *Accumulate(Eventinfo *lf);
 void Accumulate_CleanUp(void);
 
-#endif /* ACCUMULATOR_H */
+#endif /* __ACCUMULATOR_H */
+

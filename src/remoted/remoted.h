@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef LOGREMOTE_H
-#define LOGREMOTE_H
+#ifndef __LOGREMOTE_H
+#define __LOGREMOTE_H
 
 #ifndef ARGV0
 #define ARGV0 "ossec-remoted"
@@ -195,4 +195,4 @@ extern int tcp_keepintvl;
 extern int tcp_keepcnt;
 extern size_t global_counter;
 
-#endif /* LOGREMOTE_H */
+#endif /* __LOGREMOTE_H */

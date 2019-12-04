@@ -10,8 +10,8 @@
 
 #ifdef ZEROMQ_OUTPUT_ENABLED
 
-#ifndef ZEROMQ_H
-#define ZEROMQ_H
+#ifndef _ZEROMQ_H_
+#define _ZEROMQ_H_
 
 #include "eventinfo.h"
 #include <czmq.h>
@@ -24,6 +24,7 @@ void zeromq_output_start(const char *uri, const char *client_cert_path, const ch
 #endif
 void zeromq_output_end(void);
 
-#endif /* ZEROMQ_H */
+
+#endif /* _ZEROMQ_H_ */
 
 #endif /* ZEROMQ_OUTPUT_ENABLED */

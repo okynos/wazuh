@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef SEC_H
-#define SEC_H
+#ifndef __SEC_H
+#define __SEC_H
 
 #include <time.h>
 #include <pthread.h>
@@ -169,4 +169,4 @@ extern unsigned int _s_comp_print;
 extern unsigned int _s_recv_flush;
 extern int _s_verify_counter;
 
-#endif /* SEC_H */
+#endif /* __SEC_H */

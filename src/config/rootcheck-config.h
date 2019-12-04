@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CROOTCHECK_H
-#define CROOTCHECK_H
+#ifndef __CROOTCHECK_H
+#define __CROOTCHECK_H
 
 #include <stdio.h>
 #include "os_regex/os_regex.h"
@@ -66,4 +66,4 @@ typedef struct _rkconfig {
 /* Frees the Rootcheck struct  */
 void Free_Rootcheck(rkconfig * config);
 
-#endif /* CROOTCHECK_H */
+#endif /* __CROOTCHECK_H */

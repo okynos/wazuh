@@ -10,11 +10,12 @@
 
 /* Global alert header */
 
-#ifndef ALERT_H
-#define ALERT_H
+#ifndef _ALERT__H
+#define _ALERT__H
 
 #include "log.h"
 #include "exec.h"
 #include "getloglocation.h"
 
-#endif /* ALERT_H */
+#endif
+

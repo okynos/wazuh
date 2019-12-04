@@ -113,126 +113,72 @@ void wm_download_dispatch(char * buffer) {
     char * command;
     char * url;
     char * fpath;
-    char * unsc_fpath = NULL;
-    char * header;
-    char * unsc_header = NULL;
-    char * data = NULL;
-    char * unsc_data = NULL;
     char jpath[PATH_MAX];
-    char * next;
-    char * buffer_cpy;
-
-    // Copy the command buffer for error messages
-
-    os_strdup(buffer, buffer_cpy);
 
     // Get command
 
-    if (next = strchr(buffer, ' '), !(next && *next)) {
-        mdebug1("Empty request command: '%s'.", buffer_cpy);
+    if (command = strtok(buffer, " "), !(command && *command)) {
+        mdebug1("Empty request command");
         snprintf(buffer, OS_MAXSTR, "err empty command");
-        goto end;
+        return;
     }
-    *(next++) = '\0';
-    command = buffer;
 
     // Nowadays we only support the "download" command
 
     if (strcmp(command, "download")) {
-        mdebug1("Invalid request command: '%s'.", buffer_cpy);
+        mdebug1("Invalid request command: '%s'", command);
         snprintf(buffer, OS_MAXSTR, "err invalid command");
-        goto end;
+        return;
     }
 
     // Get URL
 
-    url = next;
-    if (next = wstr_chr(next, '|'), !(next && *next)) {
-        mdebug1("Empty request URL: '%s'.", buffer_cpy);
+    if (url = strtok(NULL, " "), !(url && *url)) {
+        mdebug1("Empty request URL");
         snprintf(buffer, OS_MAXSTR, "err empty url");
-        goto end;
+        return;
     }
-    *(next++) = '\0';
 
     // Get file path
 
-    fpath = next;
-    if (next = wstr_chr(next, '|'), !(next && *next)) {
-        mdebug1("Empty request file: '%s'.", buffer_cpy);
+    if (fpath = strtok(NULL, " "), !(fpath && *fpath)) {
+        mdebug1("Empty request file");
         snprintf(buffer, OS_MAXSTR, "err empty file name");
-        goto end;
-    }
-    *(next++) = '\0';
-
-    // Get request header (optional)
-
-    header = next;
-    if (next = wstr_chr(next, '|'), !(next && *next)) {
-        header = NULL;
-        mdebug2("Empty request header: '%s'.", buffer_cpy);
-        goto unsc;
-    }
-    *(next++) = '\0';
-
-    // Get request data (optional)
-
-    data = next;
-    if (next = wstr_chr(next, '|'), !(next && *next)) {
-        data = NULL;
-        mdebug2("Empty request data: '%s'.", buffer_cpy);
-        goto unsc;
-    }
-    *(next++) = '\0';
-
-unsc:
-    // Unescape
-
-    unsc_fpath = wstr_replace(fpath, "\\|", "|");
-    if (header && *header) {
-        unsc_header = wstr_replace(header, "\\|", "|");
-    }
-    if (data && *data) {
-        unsc_data = wstr_replace(data, "\\|", "|");
+        return;
     }
 
     // Jail path
 
-    if (snprintf(jpath, sizeof(jpath), "%s/%s", DEFAULTDIR, unsc_fpath) >= (int)sizeof(jpath)) {
-        mdebug1("Path too long: '%s'.", buffer_cpy);
+    if (snprintf(jpath, sizeof(jpath), "%s/%s", DEFAULTDIR, fpath) >= (int)sizeof(jpath)) {
+        mdebug1("Path too long: %s", fpath);
         snprintf(buffer, OS_MAXSTR, "err path too long");
-        goto end;
+        return;
     }
 
     if (w_ref_parent_folder(jpath)) {
-        mdebug1("Path references parent folder: '%s'.", buffer_cpy);
+        mdebug1("Path references parent folder: %s", fpath);
         snprintf(buffer, OS_MAXSTR, "err parent folder reference");
-        goto end;
+        return;
     }
 
     // Run download
     mdebug1("Downloading '%s' to '%s'", url, jpath);
 
-    switch (wurl_get(url, jpath, unsc_header, unsc_data)) {
+    switch (wurl_get(url, jpath)) {
     case OS_CONNERR:
         mdebug1(WURL_DOWNLOAD_FILE_ERROR, jpath, url);
         snprintf(buffer, OS_MAXSTR, "err connecting to url");
         break;
 
     case OS_FILERR:
-        mdebug1(WURL_WRITE_FILE_ERROR, unsc_fpath);
+        mdebug1(WURL_WRITE_FILE_ERROR, fpath);
         snprintf(buffer, OS_MAXSTR, "err writing file");
         break;
 
     default:
         snprintf(buffer, OS_MAXSTR, "ok");
-        mdebug2("Download of '%s' finished.", url);
+        mdebug2("Download of '%s' finished", url);
     }
-
-end:
-    os_free(unsc_fpath);
-    os_free(unsc_header);
-    os_free(unsc_data);
-    os_free(buffer_cpy);
 }
 
 // Destroy data

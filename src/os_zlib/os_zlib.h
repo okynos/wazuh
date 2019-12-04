@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef OS_ZLIB_H
-#define OS_ZLIB_H
+#ifndef __OS_ZLIB_H
+#define __OS_ZLIB_H
 
 /* Compress a string with zlib
  * src: the source string to compress
@@ -35,4 +35,5 @@ unsigned long int os_zlib_uncompress(const char *src, char *dst,
                                      unsigned long int src_size,
                                      unsigned long int dst_size);
 
-#endif /* OS_ZLIB_H */
+#endif /* __OS_ZLIB_H */
+

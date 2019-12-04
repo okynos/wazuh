@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef INFO_MESSAGES_H
-#define INFO_MESSAGES_H
+ #ifndef _INFO_MESSAGES__H
+ #define _INFO_MESSAGES__H
 
 /* File integrity monitoring info messages*/
 #define FIM_DAEMON_STARTED                  "(6000): Starting daemon..."
@@ -57,4 +57,4 @@
 
 #define FIM_WHODATA_VOLUMES                 "(6236): Analyzing Windows volumes"
 
-#endif /* INFO_MESSAGES_H */
+#endif

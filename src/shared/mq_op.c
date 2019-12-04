@@ -226,7 +226,6 @@ char * msgsubst(const char * pattern, const char * logmsg, const char * location
     const char * field;
     char _timestamp[64];
     char hostname[512];
-    char * escaped_log = NULL;
     size_t n = 0;
     size_t z;
 
@@ -303,8 +302,6 @@ char * msgsubst(const char * pattern, const char * logmsg, const char * location
 
             hostname[sizeof(hostname) - 1] = '\0';
             field = hostname;
-        } else if (strcmp(param, "json_escaped_log") == 0) {
-            field = escaped_log = wstr_escape_json(logmsg);
         } else {
             mdebug1("Invalid parameter '%s' for log format.", param);
             continue;
@@ -320,8 +317,6 @@ char * msgsubst(const char * pattern, const char * logmsg, const char * location
             strncpy(final + n, field, OS_MAXSTR - n);
             n += z;
         }
-
-        os_free(escaped_log);
     }
 
     // Copy rest of the pattern
@@ -343,6 +338,5 @@ fail:
     strncpy(final, logmsg ? logmsg : "Too long message format", OS_MAXSTR - 1);
     final[OS_MAXSTR - 1] = '\0';
     free(_pattern);
-    free(escaped_log);
     return final;
 }

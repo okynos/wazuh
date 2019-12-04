@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CRALERT_H
-#define CRALERT_H
+#ifndef __CRALERT_H
+#define __CRALERT_H
 
 #define CRALERT_MAIL_SET    0x001
 #define CRALERT_EXEC_SET    0x002
@@ -51,4 +51,5 @@ typedef struct _alert_data {
 alert_data *GetAlertData(int flag, FILE *fp) __attribute__((nonnull));
 void        FreeAlertData(alert_data *al_data) __attribute__((nonnull));
 
-#endif /* CRALERT_H */
+#endif
+

@@ -12,8 +12,9 @@
  * APIs for many network operations
  */
 
-#ifndef OS_NET_H
-#define OS_NET_H
+
+#ifndef __OS_NET_H
+#define __OS_NET_H
 
 /* OS_Bindport*
  * Bind a specific port (protocol and a ip).
@@ -85,18 +86,17 @@ int OS_SetRecvTimeout(int socket, long seconds, long useconds);
  */
 int OS_SetKeepalive(int socket);
 
-/**
- * @brief Set keepalive parameters for a socket
- *
- * Options with a value 0 will not be changed.
- *
- * @param socket Socket descriptor.
- * @param idle Idle time, in seconds, to start sending probes.
- * @param intvl Interval between probes, in seconds.
- * @param cnt Number of probes sent before closing the connection.
+/*
+ * Enable SO_KEEPALIVE options for TCP
  */
-void OS_SetKeepalive_Options(int socket, int idle, int intvl, int cnt);
+#ifndef CLIENT
 
+#ifdef __MACH__
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+
+void OS_SetKeepalive_Options(int socket, int idle, int intvl, int cnt);
+#endif
 /* Set the delivery timeout for a socket
  * Returns 0 on success, else -1
  */
@@ -142,4 +142,4 @@ ssize_t os_recv_waitall(int sock, void * buf, size_t size);
 // Wrapper for select()
 int wnet_select(int sock, int timeout);
 
-#endif /* OS_NET_H */
+#endif /* __OS_NET_H */

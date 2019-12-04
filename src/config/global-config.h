@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CCONFIG_H
-#define CCONFIG_H
+#ifndef _CCONFIG__H
+#define _CCONFIG__H
 
 #include "shared.h"
 
@@ -116,4 +116,4 @@ typedef struct __Config {
 
 void config_free(_Config *config);
 
-#endif /* CCONFIG_H */
+#endif /* _CCONFIG__H */

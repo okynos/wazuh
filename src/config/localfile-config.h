@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CLOGREADER_H
-#define CLOGREADER_H
+#ifndef __CLOGREADER_H
+#define __CLOGREADER_H
 
 #define EVENTLOG     "eventlog"
 #define EVENTCHANNEL "eventchannel"
@@ -113,4 +113,4 @@ void Free_Logreader(logreader * config);
 /* Removes a specific localfile of an array */
 int Remove_Localfile(logreader **logf, int i, int gl, int fr, logreader_glob *globf);
 
-#endif /* CLOGREADER_H */
+#endif /* __CLOGREADER_H */

@@ -8,12 +8,13 @@
  * Foundation
  */
 
-#ifndef EXEC_H
-#define EXEC_H
+#ifndef _EXEC__H
+#define _EXEC__H
 
 #include "eventinfo.h"
 #include "active-response.h"
 
 void OS_Exec(int execq, int arq, const Eventinfo *lf, const active_response *ar);
 
-#endif /* EXEC_H */
+#endif
+

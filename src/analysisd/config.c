@@ -316,21 +316,17 @@ cJSON *getRulesConfig(void) {
 
 cJSON *getManagerLabelsConfig(void) {
 
+    unsigned int i;
     cJSON *root = cJSON_CreateObject();
-    cJSON *labels = cJSON_CreateArray();
+    cJSON *labels = cJSON_CreateObject();
 
     if (Config.labels) {
-        unsigned int i;
-        for (i=0;Config.labels[i].key; i++) {
-            cJSON *label = cJSON_CreateObject();
-            cJSON_AddStringToObject(label, "value", Config.labels[i].value);
-            cJSON_AddStringToObject(label, "key", Config.labels[i].key);
-            cJSON_AddStringToObject(label, "hidden", Config.labels[i].flags.hidden ? "yes" : "no");
-            cJSON_AddItemToObject(labels, "", label);
+        for (i=0;Config.labels[i].key;i++) {
+            cJSON_AddStringToObject(labels,Config.labels[i].key,Config.labels[i].value);
         }
     }
 
-    cJSON_AddItemToObject(root, "labels", labels);
+    cJSON_AddItemToObject(root,"labels",labels);
 
     return root;
 }

@@ -10,8 +10,8 @@
 
 #include "shared.h"
 
-#ifndef CSYSLOGCONFIG_H
-#define CSYSLOGCONFIG_H
+#ifndef _CSYSLOGCONFIG__H
+#define _CSYSLOGCONFIG__H
 
 /* Database config structure */
 typedef struct _SyslogConfig {
@@ -48,4 +48,4 @@ struct SyslogConfig_holder {
 #define SLOG_INFO    6   /* informational */
 #define SLOG_DEBUG   7   /* debug-level messages */
 
-#endif /* CSYSLOGCONFIG_H */
+#endif /* _CSYSLOGCONFIG__H */

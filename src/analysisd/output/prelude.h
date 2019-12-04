@@ -10,8 +10,8 @@
 
 #ifdef PRELUDE_OUTPUT_ENABLED
 
-#ifndef PRELUDE_H
-#define PRELUDE_H
+#ifndef _PRELUDE_H_
+#define _PRELUDE_H_
 
 #include "eventinfo.h"
 
@@ -21,6 +21,6 @@ void prelude_start(const char *profile, int argc, char **argv);
 /* Log to Prelude */
 void OS_PreludeLog(const Eventinfo *lf);
 
-#endif /* PRELUDE_H */
+#endif /* _PRELUDE_H_ */
 
 #endif /* PRELUDE_OUTPUT_ENABLED */

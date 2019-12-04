@@ -54,11 +54,9 @@ static int wm_fluent_unpack(wm_fluent_t * fluent, msgpack_unpacker * unp, msgpac
 static wm_fluent_helo_t * wm_fluent_recv_helo(wm_fluent_t * fluent);
 static int wm_fluent_send_ping(wm_fluent_t * fluent, const wm_fluent_helo_t * helo);
 static wm_fluent_pong_t * wm_fluent_recv_pong(wm_fluent_t * fluent);
-static int wm_fluent_hs_tls(wm_fluent_t * fluent);
 static int wm_fluent_handshake(wm_fluent_t * fluent);
 static int wm_fluent_send(wm_fluent_t * fluent, const char * str, size_t size);
 static int wm_fluent_check_config(wm_fluent_t * fluent);
-static void wm_fluent_poll_server(wm_fluent_t * fluent);
 
 const wm_context WM_FLUENT_CONTEXT = {
     FLUENT_WM_NAME,
@@ -106,41 +104,28 @@ void * wm_fluent_main(wm_fluent_t * fluent) {
 
     /* Main loop */
     while (1) {
-        switch (wnet_select(server_sock, fluent->poll_interval)) {
+        recv_b = recv(server_sock, buffer, OS_MAXSTR - 1, 0);
+
+        switch (recv_b) {
         case -1:
-            merror("Cannot select input socket: %s (%d). Sleeping 10 minutes.", strerror(errno), errno);
-            sleep(600);
-            break;
-
+            merror("Cannot receive data from '%s': %s (%d)", fluent->sock_path, strerror(errno), errno);
+            continue;
         case 0:
-            wm_fluent_poll_server(fluent);
-            break;
+            merror("Empty string received from '%s'", fluent->sock_path);
+            continue;
+        default:
+            if (wm_fluent_send(fluent, buffer, recv_b) < 0) {
+                mwarn("Cannot send data to '%s': %s (%d). Reconnecting...", fluent->address, strerror(errno), errno);
 
-        case 1:
-            recv_b = recv(server_sock, buffer, OS_MAXSTR - 1, 0);
-
-            switch (recv_b) {
-            case -1:
-                merror("Cannot receive data from '%s': %s (%d)", fluent->sock_path, strerror(errno), errno);
-                continue;
-            case 0:
-                merror("Empty string received from '%s'", fluent->sock_path);
-                continue;
-            default:
-                if (wm_fluent_send(fluent, buffer, recv_b) < 0) {
-                    mwarn("Cannot send data to '%s': %s (%d). Reconnecting...", fluent->address, strerror(errno), errno);
-
-                    while (wm_fluent_handshake(fluent) < 0) {
-                        mdebug2("Handshake failed. Waiting 30 seconds.");
-                        sleep(30);
-                    }
-
-                    minfo("Connected to %s:%hu", fluent->address, fluent->port);
-                    wm_fluent_send(fluent, buffer, recv_b);
+                while (wm_fluent_handshake(fluent) < 0) {
+                    mdebug2("Handshake failed. Waiting 30 seconds.");
+                    sleep(30);
                 }
+
+                minfo("Connected to %s:%hu", fluent->address, fluent->port);
+                wm_fluent_send(fluent, buffer, recv_b);
             }
         }
-
     }
 
     return NULL;
@@ -203,17 +188,6 @@ static int wm_fluent_connect(wm_fluent_t * fluent) {
 
         if (OS_SetRecvTimeout(fluent->client_sock, fluent->timeout, 0) < 0) {
             merror("Cannot set receiving timeout to '%s': %s (%d)", fluent->address, strerror(errno), errno);
-        }
-    }
-    mdebug2("Connected to '%s'.", fluent->address);
-
-    /* Set keepalive */
-
-    if (fluent->keepalive.enabled) {
-        if (OS_SetKeepalive(fluent->client_sock) == -1) {
-            merror("Cannot enable TCP keepalive on Fluent connection: %s (%d)", strerror(errno), errno);
-        } else {
-            OS_SetKeepalive_Options(fluent->client_sock, fluent->keepalive.idle, fluent->keepalive.interval, fluent->keepalive.count);
         }
     }
 
@@ -469,7 +443,7 @@ static int wm_fluent_send_ping(wm_fluent_t * fluent, const wm_fluent_helo_t * he
     char salt[16];
     char hostname[512] = "";
     os_sha512 shared_key_hexdigest;
-    os_sha512 password = {0};
+    os_sha512 password;
     msgpack_sbuffer sbuf;
     msgpack_packer pk;
     int retval;
@@ -499,10 +473,11 @@ static int wm_fluent_send_ping(wm_fluent_t * fluent, const wm_fluent_helo_t * he
         OS_SHA512_Hex(md, shared_key_hexdigest);
     }
 
-
     if (helo->auth_size > 0) {
         unsigned char md[SHA512_DIGEST_LENGTH];
         SHA512_CTX ctx;
+
+        assert(fluent->user_name && fluent->user_pass);
 
         /* Compute password hex digest */
 
@@ -533,12 +508,11 @@ static int wm_fluent_send_ping(wm_fluent_t * fluent, const wm_fluent_helo_t * he
     if (helo->auth_size > 0) {
         msgpack_pack_str(&pk, strlen(fluent->user_name));
         msgpack_pack_str_body(&pk, fluent->user_name, strlen(fluent->user_name));
-        msgpack_pack_str(&pk, OS_SHA512_LEN - 1);
+        msgpack_pack_str(&pk, OS_SHA512_LEN - 1); /* Remove terminator byte */
         msgpack_pack_str_body(&pk, password, OS_SHA512_LEN - 1);
     } else {
-        if (strlen(fluent->user_name) || strlen(fluent->user_pass)){
-            mwarn("Credentials are configured but fluentd server does not require authentication. Please check your configuration.");
-        }
+        /* Insert two empty strings */
+
         msgpack_pack_str(&pk, 0);
         msgpack_pack_str_body(&pk, "", 0);
         msgpack_pack_str(&pk, 0);
@@ -604,54 +578,11 @@ end:
     return pong;
 }
 
-static int wm_fluent_hs_tls(wm_fluent_t * fluent) {
+static int wm_fluent_handshake(wm_fluent_t * fluent) {
+    wm_fluent_helo_t * helo = NULL;
+    wm_fluent_pong_t * pong = NULL;
     int retval = -1;
 
-    /* TLS mode */
-
-    if (wm_fluent_ssl_connect(fluent) < 0) {
-        return -1;
-    }
-
-    mdebug1("Connection with %s:%hu established", fluent->address, fluent->port);
-
-    /* Fluent protocol handshake */
-    wm_fluent_helo_t * helo = wm_fluent_recv_helo(fluent);
-
-    if (!helo) {
-        merror("Cannot receive HELO message from server");
-        return -1;
-    }
-
-    wm_fluent_pong_t * pong = NULL;
-    if (wm_fluent_send_ping(fluent, helo) < 0) {
-        merror("Cannot send PING message to server");
-        goto end;
-    }
-
-    pong = wm_fluent_recv_pong(fluent);
-    if (!pong) {
-        merror("Cannot receive PONG message from server");
-        goto end;
-    }
-
-    /* Check the authentication result */
-
-    if (!pong->auth_result) {
-        mwarn("Authentication error: the Fluent server rejected the connection: %s", pong->reason ? pong->reason : "Unknown reason");
-        goto end;
-    }
-
-    minfo("Connected to host '%s' (%s:%hu)", pong->server_hostname, fluent->address, fluent->port);
-
-    retval = 0;
-end:
-    wm_fluent_helo_free(helo);
-    wm_fluent_pong_free(pong);
-    return retval;
-}
-
-static int wm_fluent_handshake(wm_fluent_t * fluent) {
     /* Connect to address */
 
     if (wm_fluent_connect(fluent) < 0) {
@@ -659,14 +590,59 @@ static int wm_fluent_handshake(wm_fluent_t * fluent) {
     }
 
     if (fluent->shared_key) {
-        if (wm_fluent_hs_tls(fluent) < 0) {
+        /* TLS mode */
+
+        if (wm_fluent_ssl_connect(fluent) < 0) {
             return -1;
         }
+
+        mdebug1("Connection with %s:%hu established", fluent->address, fluent->port);
+
+        /* Fluent protocol handshake */
+
+        helo = wm_fluent_recv_helo(fluent);
+        if (!helo) {
+            merror("Cannot receive HELO message from server");
+            return -1;
+        }
+
+        if (helo->auth_size > 0) {
+            if (!(fluent->user_name && fluent->user_pass)) {
+                mwarn("Authentication error: the Fluent server requires user name and password.");
+                goto end;
+            }
+        } else if (fluent->user_name || fluent->user_pass) {
+            mdebug1("The Fluent server does not require user authentication. Ignoring user name and pass.");
+        }
+
+        if (wm_fluent_send_ping(fluent, helo) < 0) {
+            merror("Cannot send PING message to server");
+            goto end;
+        }
+
+        pong = wm_fluent_recv_pong(fluent);
+        if (!pong) {
+            merror("Cannot receive PONG message from server");
+            goto end;
+        }
+
+        /* Check the authentication result */
+
+        if (!pong->auth_result) {
+            mwarn("Authentication error: the Fluent server rejected the connection: %s", pong->reason ? pong->reason : "");
+            goto end;
+        }
+
+        minfo("Connected to host '%s' (%s:%hu)", pong->server_hostname, fluent->address, fluent->port);
     } else {
         minfo("Connected to host %s:%hu", fluent->address, fluent->port);
     }
 
-    return 0;
+    retval = 0;
+end:
+    wm_fluent_helo_free(helo);
+    wm_fluent_pong_free(pong);
+    return retval;
 }
 
 static int wm_fluent_send(wm_fluent_t * fluent, const char * str, size_t size) {
@@ -756,52 +732,9 @@ static int wm_fluent_check_config(wm_fluent_t * fluent) {
     return 0;
 }
 
-// Poll server connection
-void wm_fluent_poll_server(wm_fluent_t * fluent) {
-    char buffer[4];
-    int flags = fcntl(fluent->client_sock, F_GETFL, 0);
-
-    mdebug2("Polling Fluent server.");
-
-    // Set up non-blocking mode
-
-    if (fcntl(fluent->client_sock, F_SETFL, flags | O_NONBLOCK) == -1) {
-        merror("Cannot set up non-blocking mode: %s (%d)", strerror(errno), errno);
-        return;
-    }
-
-    // Peek connection
-
-    switch (SSL_read(fluent->ssl, buffer, sizeof(buffer))) {
-    case -1:
-        // No input data. This is the normal case.
-        break;
-
-    case 0:
-        minfo("Fluent server is down or timed-out. Reconnecting.");
-
-        while (wm_fluent_handshake(fluent) < 0) {
-            mdebug2("Handshake failed. Waiting 30 seconds.");
-            sleep(30);
-        }
-
-        return;
-
-    default:
-        mdebug1("Input data from Fluent server available.");
-    }
-
-    // Disable non-blocking mode back
-
-    if (fcntl(fluent->client_sock, F_SETFL, flags) == -1) {
-        merror("Cannot restore non-blocking mode: %s (%d)", strerror(errno), errno);
-    }
-}
-
 cJSON *wm_fluent_dump(const wm_fluent_t *fluent) {
     cJSON *root = cJSON_CreateObject();
     cJSON *wm_wd = cJSON_CreateObject();
-    cJSON *keepalive = cJSON_CreateObject();
 
     cJSON_AddStringToObject(wm_wd, "enabled", fluent->enabled ? "yes" : "no");
     if (fluent->tag) cJSON_AddStringToObject(wm_wd, "tag", fluent->tag);
@@ -810,17 +743,10 @@ cJSON *wm_fluent_dump(const wm_fluent_t *fluent) {
     if (fluent->port) cJSON_AddNumberToObject(wm_wd, "port", fluent->port);
     if (fluent->shared_key) cJSON_AddStringToObject(wm_wd, "shared_key", fluent->shared_key);
     if (fluent->certificate) cJSON_AddStringToObject(wm_wd, "ca_file", fluent->certificate);
-    cJSON_AddStringToObject(wm_wd, "user", fluent->user_name);
-    cJSON_AddStringToObject(wm_wd, "password", fluent->user_pass);
+    if (fluent->user_name) cJSON_AddStringToObject(wm_wd, "user", fluent->user_name);
+    if (fluent->user_pass) cJSON_AddStringToObject(wm_wd, "password", fluent->user_pass);
     cJSON_AddNumberToObject(wm_wd, "timeout", fluent->timeout);
-    cJSON_AddNumberToObject(wm_wd, "poll_interval", fluent->poll_interval);
 
-    cJSON_AddStringToObject(keepalive, "enabled", fluent->keepalive.enabled ? "yes" : "no");
-    if (fluent->keepalive.count) cJSON_AddNumberToObject(keepalive, "count", fluent->keepalive.count);
-    if (fluent->keepalive.idle) cJSON_AddNumberToObject(keepalive, "idle", fluent->keepalive.idle);
-    if (fluent->keepalive.interval) cJSON_AddNumberToObject(keepalive, "interval", fluent->keepalive.interval);
-
-    cJSON_AddItemToObject(wm_wd, "keepalive", keepalive);
     cJSON_AddItemToObject(root,"fluent-forward",wm_wd);
 
     return root;

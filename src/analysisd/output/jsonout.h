@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef JSONOUT_H
-#define JSONOUT_H
+#ifndef _JSONOUT_H_
+#define _JSONOUT_H_
 
 #include "eventinfo.h"
 
@@ -18,4 +18,4 @@ void jsonout_output_archive(const Eventinfo *lf);
 void jsonout_output_archive_flush();
 void jsonout_output_event_flush();
 
-#endif /* JSONOUT_H */
+#endif /* _JSONOUT_H_ */

@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef AGENTLESSDCONFIG_H
-#define AGENTLESSDCONFIG_H
+#ifndef _AGENTLESSDCONFIG_H
+#define _AGENTLESSDCONFIG_H
 
 /* Entry states */
 #define LESSD_STATE_CONNECTED       0x001
@@ -41,4 +41,5 @@ typedef struct _agentlessd_config {
 
 } agentlessd_config;
 
-#endif /* AGENTLESSDCONFIG_H */
+#endif /* _AGENTLESSDCONFIG_H */
+

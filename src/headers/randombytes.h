@@ -8,11 +8,11 @@
  * Foundation.
  */
 
-#ifndef RANDOMBYTES_H
-#define RANDOMBYTES_H
+#ifndef __RANDOMBYTES_H
+#define __RANDOMBYTES_H
 
 void randombytes(void *ptr, size_t length);
 void srandom_init(void);
 int os_random(void);
 
-#endif /* RANDOMBYTES_H */
+#endif
