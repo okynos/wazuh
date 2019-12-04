@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef STAT_H
-#define STAT_H
+#ifndef _STAT__H
+#define _STAT__H
 
 void LastMsg_Change(const char *log, int t_id);
 int LastMsg_Stats(const char *log, int t_id);
@@ -24,4 +24,4 @@ void Update_Hour(void);
 int Check_Hour(void);
 int Start_Hour(int t_id, int threads_number);
 void Start_Time();
-#endif /* STAT_H */
+#endif /* _STAT__H */

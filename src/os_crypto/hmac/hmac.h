@@ -8,12 +8,12 @@
  * Foundation.
  */
 
-#ifndef HMAC_H
-#define HMAC_H
+#ifndef __HMAC_H
+#define __HMAC_H
 
 #define HMAC_SHA1_BLOCKSIZE 64
 
 int OS_HMAC_SHA1_Str(const char *key, const char *text, os_sha1 output) __attribute((nonnull));
 int OS_HMAC_SHA1_File(const char *key, const char *file_path, os_sha1 output, int mode) __attribute((nonnull));
 
-#endif /* HMAC_H */
+#endif

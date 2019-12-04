@@ -132,8 +132,7 @@ int Read_WModule(const OS_XML *xml, xml_node *node, void *d1, void *d2)
 #ifndef WIN32
 #ifndef CLIENT
     else if (!strcmp(node->values[0], WM_VULNDETECTOR_CONTEXT.name)) {
-        mwarn("This vulnerability-detector declaration is deprecated. Use <vulnerability-detector> instead.");
-        if (Read_Vuln(xml, children, cur_wmodule, 0) < 0) {
+        if (wm_vuldet_read(xml, children, cur_wmodule) < 0) {
             OS_ClearNode(children);
             return OS_INVALID;
         }

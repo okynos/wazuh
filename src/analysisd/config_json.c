@@ -7,8 +7,8 @@
  * Foundation.
 */
 
-#ifndef CONFIG_JSON_H
-#define CONFIG_JSON_H
+#ifndef _CONFIG_JSON__H
+#define _CONFIG_JSON__H
 
 #include "config.h"
 
@@ -64,9 +64,6 @@ void _getDecodersListJSON(OSDecoderNode *list, cJSON *array) {
                 }
                 else if (node->osdecoder->order[i] == Data_FP) {
                     cJSON_AddItemToArray(_list,cJSON_CreateString("data"));
-                }
-                else if (node->osdecoder->order[i] == Extra_Data_FP) {
-                    cJSON_AddItemToArray(_list,cJSON_CreateString("extra_data"));
                 }
                 else if (node->osdecoder->order[i] == Status_FP) {
                     cJSON_AddItemToArray(_list,cJSON_CreateString("status"));
@@ -202,9 +199,6 @@ void _getRulesListJSON(RuleNode *list, cJSON *array) {
         if (node->ruleinfo->user) cJSON_AddStringToObject(rule,"user",node->ruleinfo->user->raw);
         if (node->ruleinfo->url) cJSON_AddStringToObject(rule,"url",node->ruleinfo->url->raw);
         if (node->ruleinfo->id) cJSON_AddStringToObject(rule,"id",node->ruleinfo->id->raw);
-        if (node->ruleinfo->system_name) cJSON_AddStringToObject(rule,"system_name",node->ruleinfo->system_name->raw);
-        if (node->ruleinfo->protocol) cJSON_AddStringToObject(rule,"protocol",node->ruleinfo->protocol->raw);
-        if (node->ruleinfo->data) cJSON_AddStringToObject(rule, "data", node->ruleinfo->data->raw);     
         if (node->ruleinfo->status) cJSON_AddStringToObject(rule,"status",node->ruleinfo->status->raw);
         if (node->ruleinfo->hostname) cJSON_AddStringToObject(rule,"hostname",node->ruleinfo->hostname->raw);
         if (node->ruleinfo->program_name) cJSON_AddStringToObject(rule,"program_name",node->ruleinfo->program_name->raw);
@@ -260,4 +254,4 @@ void _getRulesListJSON(RuleNode *list, cJSON *array) {
     }
 }
 
-#endif /* CONFIG_JSON_H */
+#endif

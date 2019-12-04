@@ -8,8 +8,9 @@
  * Foundation.
  */
 
-#ifndef AES_OP_H
-#define AES_OP_H
+#ifndef __AES_OP_H
+#define __AES_OP_H
+
 
 #define OS_ENCRYPT      1
 #define OS_DECRYPT      0
@@ -21,4 +22,4 @@ int decrypt_AES(const unsigned char *ciphertext, int ciphertext_len, unsigned ch
 int OS_AES_Str(const char *input, char *output, const char *charkey,
               long size, short int action) __attribute((nonnull));
 
-#endif /* AES_OP_H */
+#endif

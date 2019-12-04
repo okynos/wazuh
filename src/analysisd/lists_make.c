@@ -19,18 +19,18 @@
 #include "lists_make.h"
 
 
-void Lists_OP_MakeAll(int force, int show_message)
+void Lists_OP_MakeAll(int force)
 {
     ListNode *lnode = OS_GetFirstList();
     while (lnode) {
         Lists_OP_MakeCDB(lnode->txt_filename,
                          lnode->cdb_filename,
-                         force, show_message);
+                         force);
         lnode = lnode->next;
     }
 }
 
-void Lists_OP_MakeCDB(const char *txt_filename, const char *cdb_filename, const int force, const int show_message)
+void Lists_OP_MakeCDB(const char *txt_filename, const char *cdb_filename, int force)
 {
     struct cdb_make cdbm;
     FILE *tmp_fd;
@@ -47,9 +47,7 @@ void Lists_OP_MakeCDB(const char *txt_filename, const char *cdb_filename, const 
 
     if (File_DateofChange(txt_filename) > File_DateofChange(cdb_filename) ||
             force) {
-    	if (show_message){
-            printf(" * CDB list %s has been updated successfully\n", cdb_filename);
-        }
+        printf(" * File %s needs to be updated\n", cdb_filename);
         if (tmp_fd = fopen(tmp_filename, "w+"), !tmp_fd) {
             merror(FOPEN_ERROR, tmp_filename, errno, strerror(errno));
             return;
@@ -155,7 +153,7 @@ void Lists_OP_MakeCDB(const char *txt_filename, const char *cdb_filename, const 
             merror("Could not chmod cdb list '%s' to 660 due to: [%d - %s]", cdb_filename, errno, strerror(errno));
             return;
         }
-    } else if(show_message){
-        printf(" * CDB list %s is up-to-date\n", cdb_filename);
+    } else {
+        printf(" * File %s does not need to be compiled\n", cdb_filename);
     }
 }

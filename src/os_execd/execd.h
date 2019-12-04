@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef EXECD_H
-#define EXECD_H
+#ifndef _EXECD_H
+#define _EXECD_H
 
 #ifndef ARGV0
 #define ARGV0 "ossec-execd"
@@ -78,4 +78,4 @@ typedef struct _timeout_data {
 
 void FreeTimeoutEntry(timeout_data *timeout_entry);
 
-#endif /* EXECD_H */
+#endif

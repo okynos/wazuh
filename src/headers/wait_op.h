@@ -8,19 +8,12 @@
  * Foundation
  */
 
-#ifndef WAIT_OP_H
-#define WAIT_OP_H
+#ifndef __WAIT_OP_H
+#define __WAIT_OP_H
 
 void os_setwait(void);
 void os_delwait(void);
 void os_wait(void);
 
-/**
- * @brief Check whether the agent wait mark is on (manager is disconnected)
- *
- * @retval true The agent is blocked.
- * @retval false The agent is not blocked.
- */
-bool os_iswait();
+#endif
 
-#endif /* WAIT_OP_H */

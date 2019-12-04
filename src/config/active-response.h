@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CAR_H
-#define CAR_H
+#ifndef _CAR__H
+#define _CAR__H
 
 /* Active response commands */
 typedef struct _ar_command {
@@ -39,4 +39,4 @@ typedef struct _ar {
 /* Active response flag */
 extern int ar_flag;
 
-#endif /* CAR_H */
+#endif /* _CAR__H */

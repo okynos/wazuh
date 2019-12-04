@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef VALIDATE_H
-#define VALIDATE_H
+#ifndef __VALIDATE_H
+#define __VALIDATE_H
 
 /* IP structure */
 typedef struct _os_ip {
@@ -102,4 +102,4 @@ int w_validate_interval(int interval, int force);
 /* Check if the IP is a single host, not a network with a netmask */
 #define isSingleHost(x) (x->netmask == 0xFFFFFFFF)
 
-#endif /* VALIDATE_H */
+#endif

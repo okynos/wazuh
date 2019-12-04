@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef SYSCHECK_H
-#define SYSCHECK_H
+#ifndef __SYSCHECK_H
+#define __SYSCHECK_H
 
 #include "config/syscheck-config.h"
 #include "external/cJSON/cJSON.h"
@@ -153,4 +153,4 @@ int fim_delete_hashes(const char * const file_name);
 #define check_removed_file(x) ({ strstr(x, ":\\$recycle.bin") ? 1 : 0; })
 #endif
 
-#endif /* SYSCHECK_H */
+#endif

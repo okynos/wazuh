@@ -10,8 +10,8 @@
 
 /* Active Response shared headers */
 
-#ifndef AR_H
-#define AR_H
+#ifndef __AR_H
+#define __AR_H
 
 /* Recipient agents */
 #define ALL_AGENTS      0000001
@@ -38,4 +38,5 @@
 #define DSTIP       0000002
 #define USERNAME    0000001
 
-#endif /* AR_H */
+#endif /* __AR_H */
+

@@ -10,8 +10,8 @@
 
 /* Basic logging operations */
 
-#ifndef LOG_H
-#define LOG_H
+#ifndef __LOG_H
+#define __LOG_H
 
 #include "eventinfo.h"
 
@@ -27,4 +27,5 @@ void OS_CustomLog_Flush();
 void OS_Store_Flush();
 int FW_Log(Eventinfo *lf);
 
-#endif /* LOG_H */
+#endif
+

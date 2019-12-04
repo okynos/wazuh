@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef GETLL_H
-#define GETLL_H
+#ifndef __GETLL_H
+#define __GETLL_H
 
 #include "eventinfo.h"
 #include "analysisd.h"
@@ -33,4 +33,4 @@ extern FILE *_ejflog;
 
 void OS_RotateLogs(int day,int year,char *mon);
 
-#endif /* GETLL_H */
+#endif /* __GETLL_H */

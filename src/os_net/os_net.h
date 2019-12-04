@@ -12,8 +12,9 @@
  * APIs for many network operations
  */
 
-#ifndef OS_NET_H
-#define OS_NET_H
+
+#ifndef __OS_NET_H
+#define __OS_NET_H
 
 /* OS_Bindport*
  * Bind a specific port (protocol and a ip).
@@ -141,4 +142,4 @@ ssize_t os_recv_waitall(int sock, void * buf, size_t size);
 // Wrapper for select()
 int wnet_select(int sock, int timeout);
 
-#endif /* OS_NET_H */
+#endif /* __OS_NET_H */

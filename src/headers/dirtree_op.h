@@ -10,8 +10,8 @@
 
 /* Common API for dealing with directory trees */
 
-#ifndef OS_DIRTREE
-#define OS_DIRTREE
+#ifndef _OS_DIRTREE
+#define _OS_DIRTREE
 
 typedef struct _OSDirTree OSDirTree;
 
@@ -34,4 +34,5 @@ void *OSDirTree_SearchTree(const OSDirTree *tree, const char *str, char sep) __a
 
 OSTreeNode *OSDirTree_GetFirstNode(OSDirTree *tree) __attribute__((nonnull));
 
-#endif /* OS_DIRTREE */
+#endif /* _OS_DIRTREE */
+

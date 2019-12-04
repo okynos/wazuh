@@ -214,7 +214,15 @@ void* wm_ciscat_main(wm_ciscat *ciscat) {
             if (id < 0)
                 id = -id;
         #else
-            int id = wm_sys_get_random_id();
+            unsigned int id1 = os_random();
+            unsigned int id2 = os_random();
+
+            char random_id[OS_MAXSTR];
+            snprintf(random_id, OS_MAXSTR - 1, "%u%u", id1, id2);
+
+            int id = atoi(random_id);
+            if (id < 0)
+                id = -id;
         #endif
 
             for (eval = ciscat->evals; eval; eval = eval->next) {

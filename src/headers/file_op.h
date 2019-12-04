@@ -102,6 +102,7 @@ int w_copy_file(const char *src, const char *dst,char mode,char * message,int si
 #ifdef WIN32
 int checkVista();
 int isVista;
+int get_creation_date(char *dir, SYSTEMTIME *utc);
 
 // Move to the directory where this executable lives in
 void w_ch_exec_dir();
@@ -154,4 +155,4 @@ void w_file_cloexec(FILE * fp);
 /* Prevent children processes from inheriting a file descriptor */
 void w_descriptor_cloexec(int fd);
 
-#endif /* FILE_OP_H */
+#endif /* __FILE_H */

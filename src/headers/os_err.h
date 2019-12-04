@@ -10,8 +10,8 @@
 
 /* Basic error codes */
 
-#ifndef OS_ERR
-#define OS_ERR
+#ifndef __OS_ERR
+#define __OS_ERR
 
 #define OS_SUCCESS      0   /* Success                  */
 #define OS_INVALID      -1  /* Invalid entry            */
@@ -30,4 +30,4 @@
 #define OS_ENDFILE      -20 /* End of file              */
 #define OS_FINISH       -21 /* Finished this task       */
 
-#endif /* OS_ERR */
+#endif /* __OS_ERR */

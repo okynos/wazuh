@@ -391,23 +391,11 @@ void *Data_FP(Eventinfo *lf, char *field, __attribute__((unused)) const char *or
 {
 #ifdef TESTRULE
     if (!alert_only) {
-        print_out("       data: '%s'", field);
-    }
-#endif
-
-    lf->data = field;
-    return (NULL);
-}
-
-void *Extra_Data_FP(Eventinfo *lf, char *field, __attribute__((unused)) const char *order)
-{
-#ifdef TESTRULE
-    if (!alert_only) {
         print_out("       extra_data: '%s'", field);
     }
 #endif
 
-    lf->extra_data = field;
+    lf->data = field;
     return (NULL);
 }
 

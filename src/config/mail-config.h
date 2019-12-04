@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef MCCONFIG_H
-#define MCCONFIG_H
+#ifndef _MCCONFIG__H
+#define _MCCONFIG__H
 
 #include "shared.h"
 
@@ -54,4 +54,4 @@ typedef struct _MailConfig {
 #define FORWARD_NOW     4
 #define DONOTGROUP      5
 
-#endif /* MCCONFIG_H */
+#endif /* _MCCONFIG__H */

@@ -557,11 +557,12 @@ multiline log
 ])
 @patch("wazuh.manager.previous_month", return_value=datetime.strptime('2019-03-01 00:00:00', '%Y-%m-%d %H:%M:%S'))
 def test_ossec_log(mock_month, test_manager, category, type_log, totalItems, sort):
-    """Test reading ossec.log file contents."""
+    """
+    Tests reading ossec.log file contents
+    """
     with patch('wazuh.manager.tail') as tail_patch:
         tail_patch.return_value = ossec_log_file.splitlines()
-        filters = {'category': category, 'type_log': type_log}
-        logs = ossec_log(filters=filters, sort=sort)
+        logs = ossec_log(category=category, type_log=type_log, sort=sort)
         assert logs['totalItems'] == totalItems
         assert all(log['description'][-1] != '\n' for log in logs['items'])
         if category != 'all' and category != 'wazuh-modulesd:syscollector':

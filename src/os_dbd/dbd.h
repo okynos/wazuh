@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef DBD_H
-#define DBD_H
+#ifndef _DBD_H
+#define _DBD_H
 
 #include "shared.h"
 #include "db_op.h"
@@ -38,4 +38,5 @@ void OS_DBD(DBConfig *db_config) __attribute__((nonnull)) __attribute__((noretur
 /* Set config pointer for osbd_op */
 void osdb_setconfig(DBConfig *db_config);
 
-#endif /* DBD_H */
+#endif /* _DBD_H */
+

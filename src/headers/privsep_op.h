@@ -10,8 +10,8 @@
 
 /* Functions for privilege separation */
 
-#ifndef PRIV_H
-#define PRIV_H
+#ifndef __PRIV_H
+#define __PRIV_H
 
 #include "shared.h"
 
@@ -25,4 +25,5 @@ int Privsep_SetGroup(gid_t gid);
 
 int Privsep_Chroot(const char *path) __attribute__((nonnull));
 
-#endif /* PRIV_H */
+#endif
+

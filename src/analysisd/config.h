@@ -8,8 +8,8 @@
  * Foundation
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef _CONFIG__H
+#define _CONFIG__H
 
 #include "config/config.h"
 #include "config/global-config.h"
@@ -43,4 +43,4 @@ void _getRulesListJSON(RuleNode *list, cJSON *array);
 cJSON *getAnalysisInternalOptions(void);
 cJSON *getManagerLabelsConfig(void);
 
-#endif /* CONFIG_H */
+#endif /* _CONFIG__H */

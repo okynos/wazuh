@@ -203,7 +203,9 @@ void HandleSecure()
                         default:
                             merror("TCP peer [%d] at %s: %s (%d)", sock_client, inet_ntoa(peer_info.sin_addr), strerror(errno), errno);
                         }
-                        fallthrough;
+
+                        // Fallthrough
+
                     case 0:
                         _close_sock(&keys, sock_client);
                         continue;

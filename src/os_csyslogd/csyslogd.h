@@ -8,8 +8,8 @@
  * Foundation.
  */
 
-#ifndef CSYSLOGD_H
-#define CSYSLOGD_H
+#ifndef _CSYSLOGD_H
+#define _CSYSLOGD_H
 
 #include "config/csyslogd-config.h"
 #include "cJSON.h"
@@ -54,4 +54,4 @@ extern char __shost_long[512];
 
 extern SyslogConfig **syslog_config;
 
-#endif /* CSYSLOGD_H */
+#endif /* _CSYSLOGD_H */

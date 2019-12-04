@@ -10,8 +10,8 @@
 
 /* Rules are needed for lists */
 
-#ifndef LISTS_H
-#define LISTS_H
+#ifndef __LISTS_H
+#define __LISTS_H
 
 #include "cdb/cdb.h"
 #include "cdb/uint32.h"
@@ -67,4 +67,4 @@ ListNode *OS_FindList(const char *listname);
 
 void Lists_OP_CreateLists(void);
 
-#endif /* LISTS_H */
+#endif /* __LISTS_H */
