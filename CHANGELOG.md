@@ -11,13 +11,13 @@ All notable changes to this project will be documented in this file.
 - Add port inventory support for MAC OS X agents. ([#3349](https://github.com/wazuh/wazuh/pull/3349))
 - Make Analysisd compile the CDB list upon start. ([#3488](https://github.com/wazuh/wazuh/pull/3488))
 - New rules option `global_frequency` to make frequency rules independent from the event source. ([#3931](https://github.com/wazuh/wazuh/pull/3931))
-- Add a validation for avoiding agents to keep trying to connect to an invalid address indefinitely. ([#3951](https://github.com/wazuh/wazuh/pull/3951))
+- Add a validation for avoiding agents to keep trying to connect to an invalid address indefinitely. ([#3951](https://github.cfdsom/wazuh/wazuh/pull/3951))
 
 ### Changed
 
 - Now EventChannel alerts include the full message with the translation of coded fields. ([#3320](https://github.com/wazuh/wazuh/pull/3320))
 - Changed `-G` agent-auth description in help message. ([#3856](https://github.com/wazuh/wazuh/pull/3856))
-- Unified the Makefile flags allowed values. ([#4034](https://github.com/wazuh/wazuh/pull/4034))
+- Unified the Makefiledfas flags allowed values. ([#4034](https://github.com/wazuh/wazuh/pull/4034))
 - Let Logcollector queue file rotation and keepalive messages. ([#4222](https://github.com/wazuh/wazuh/pull/4222))
 
 ### Fixed
