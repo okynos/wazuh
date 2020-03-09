@@ -22,7 +22,7 @@ int auth_remove_agent(int sock, const char *id, int json_format) {
     char *output;
     char wdbquery[OS_SIZE_128];
     char *wdboutput;
-    int result = -1;
+    int result;
     ssize_t length;
     cJSON *response;
     cJSON *error;
@@ -68,23 +68,17 @@ int auth_remove_agent(int sock, const char *id, int json_format) {
                 message = cJSON_GetObjectItem(response, "message");
                 merror("ERROR %d: %s", error->valueint, message ? message->valuestring : "(undefined)");
             }
+
+            result = -1;
         } else {
-            int wdb_sock = -1;
-            int error;
+            result = 0;
 
             snprintf(wdbquery, OS_SIZE_128, "agent %s remove", id);
-            os_calloc(OS_SIZE_6144, sizeof(char), wdboutput);
-            if (error = wdbc_query_ex(&wdb_sock, wdbquery, wdboutput, OS_SIZE_6144), error) {
-                merror("Could not remove the agent %s. Error: %d.", id, error);
-            } else {
-                result = 0;
-            }
+            wdb_send_query(wdbquery, &wdboutput);
 
-            if (wdb_sock >= 0) {
-                close(wdb_sock);
+            if (wdboutput) {
+                os_free(wdboutput);
             }
-
-            os_free(wdboutput);
         }
 
         cJSON_Delete(response);

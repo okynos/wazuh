@@ -17,7 +17,6 @@
 #include "wazuh_modules/wmodules.h"
 #include "wazuh_modules/wm_sca.h"
 #include "agentd.h"
-#include "syscheck_op.h"
 
 static const char * IGNORE_LIST[] = { SHAREDCFG_FILENAME, NULL };
 w_queue_t * winexec_queue;
@@ -149,8 +148,8 @@ void *receiver_thread(__attribute__((unused)) void *none)
                 }
 
                 /* Restart syscheck */
-                else if (strncmp(tmp_msg, HC_SK, strlen(HC_SK)) == 0) {
-                    ag_send_syscheck(tmp_msg + strlen(HC_SK));
+                else if (strcmp(tmp_msg, HC_SK_RESTART) == 0) {
+                    os_set_restart_syscheck();
                     continue;
                 }
 

@@ -409,7 +409,7 @@ int main(int argc, char **argv)
     }
 
     /* Append new line character */
-    strcat(buf,"\n");
+    strncat(buf,"\n",1);
     ret = SSL_write(ssl, buf, strlen(buf));
     if (ret < 0) {
         merror("SSL write error (unable to send message.)");

@@ -164,21 +164,14 @@ int OS_RemoveAgent(const char *u_id) {
     }
 
     // Remove DB from wazuh-db
-    int sock = -1;
-    int error;
     snprintf(wdbquery, OS_SIZE_128, "agent %s remove", u_id);
-    os_calloc(OS_SIZE_6144, sizeof(char), wdboutput);
-    if (error = wdbc_query_ex(&sock, wdbquery, wdboutput, OS_SIZE_6144), !error) {
+    wdb_send_query(wdbquery, &wdboutput);
+
+    if (wdboutput) {
         mdebug1("DB from agent %s was deleted '%s'", u_id, wdboutput);
-    } else {
-        merror("Could not remove the DB of the agent %s. Error: %d.", u_id, error);
+        os_free(wdboutput);
     }
 
-    if (sock >= 0) {
-        close(sock);
-    }
-
-    os_free(wdboutput);
 
     /* Remove counter for ID */
     OS_RemoveCounter(u_id);

@@ -11,22 +11,15 @@
 #ifndef AGENT_OP_H
 #define AGENT_OP_H
 
-/**
- * @brief Check if syscheck is to be executed/restarted
- * @return 1 on success or 0 on failure (shouldn't be executed now).
+/* Check if syscheck is to be executed/restarted
+ * Returns 1 on success or 0 on failure (shouldn't be executed now)
  */
 int os_check_restart_syscheck(void);
 
-/**
- * @brief Check if rootcheck is to be executed/restarted
- * @return 1 on success or 0 on failure (shouldn't be executed now).
+/* Set syscheck to be restarted
+ * Returns 1 on success or 0 on failure
  */
-int os_check_restart_rootcheck(void);
-
-/**
- * @brief Set syscheck and rootcheck to be restarted
- */
-void os_set_restart_syscheck(void);
+int os_set_restart_syscheck(void);
 
 /* Read the agent name for the current agent
  * Returns NULL on error

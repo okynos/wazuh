@@ -11,6 +11,9 @@
 #include "shared.h"
 
 
+/* Get the first available prime after the provided value
+ * Returns 0 on error
+ */
 unsigned int os_getprime(unsigned int val)
 {
     unsigned int i;
@@ -43,3 +46,4 @@ unsigned int os_getprime(unsigned int val)
 
     return (0);
 }
+

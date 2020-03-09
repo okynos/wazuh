@@ -1,5 +1,7 @@
 /*
+ * Time operations
  * Copyright (C) 2015-2019, Wazuh Inc.
+ * October 4, 2017
  *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General Public
@@ -7,25 +9,13 @@
  * Foundation.
  */
 
-/**
- * @file time_op.c
- * @brief Time operations
- * @author Vikman Fernandez-Castro
- * @author Jose Rafael Cenit
- * @author Pablo Navarro
- * @date October 4, 2017
- */
-
 #include "shared.h"
 
 #ifndef WIN32
-
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
 #endif
-
-// Get the current calendar time
 
 void gettime(struct timespec *ts) {
 #ifdef __MACH__
@@ -41,46 +31,18 @@ void gettime(struct timespec *ts) {
 #endif
 }
 
-#else
+// Computes a -= b
+void time_sub(struct timespec * a, const struct timespec * b) {
+    a->tv_sec -= b->tv_sec;
+    a->tv_nsec -= b->tv_nsec;
 
-#include <windows.h>
-#define EPOCH_DIFFERENCE 11644473600LL
-
-// Get the epoch time
-
-long long int get_windows_time_epoch() {
-    FILETIME ft = {0};
-
-    GetSystemTimeAsFileTime(&ft);
-    return get_windows_file_time_epoch(ft);
+    if (a->tv_nsec < 0) {
+        a->tv_nsec += 1000000000;
+        a->tv_sec--;
+    }
 }
 
-// Get the epoch time from a FILETIME object
-
-long long int get_windows_file_time_epoch(FILETIME ft) {
-    LARGE_INTEGER li = {0};
-
-    li.LowPart = ft.dwLowDateTime;
-    li.HighPart = ft.dwHighDateTime;
-
-    /* Current machine EPOCH time */
-    long long int file_time_epoch = (li.QuadPart / 10000000) - EPOCH_DIFFERENCE;
-    return file_time_epoch;
-}
-
-void gettime(struct timespec * ts) {
-    FILETIME ft;
-    GetSystemTimeAsFileTime(&ft);
-
-    LARGE_INTEGER li = {.LowPart = ft.dwLowDateTime, .HighPart = ft.dwHighDateTime};
-
-    // Contains a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (UTC).
-
-    ts->tv_sec = li.QuadPart / 10000000 - EPOCH_DIFFERENCE;
-    ts->tv_nsec = (li.QuadPart % 10000000) * 100;
-}
-
-#endif
+#endif // WIN32
 
 char *w_get_timestamp(time_t time) {
     struct tm localtm;
@@ -97,20 +59,32 @@ char *w_get_timestamp(time_t time) {
     return timestamp;
 }
 
-// Compute time substraction "a - b"
+#ifdef WIN32
+#include <windows.h>
+#define EPOCH_DIFFERENCE 11644473600LL
 
-void time_sub(struct timespec * a, const struct timespec * b) {
-    a->tv_sec -= b->tv_sec;
-    a->tv_nsec -= b->tv_nsec;
+long long int get_windows_time_epoch() {
+    FILETIME ft = {0};
+    LARGE_INTEGER li = {0};
 
-    if (a->tv_nsec < 0) {
-        a->tv_nsec += 1000000000;
-        a->tv_sec--;
-    }
+    GetSystemTimeAsFileTime(&ft);
+    li.LowPart = ft.dwLowDateTime;
+    li.HighPart = ft.dwHighDateTime;
+
+    /* Current machine EPOCH time */
+    long long int c_currenttime_epoch = (li.QuadPart / 10000000) - EPOCH_DIFFERENCE;
+    return c_currenttime_epoch;
 }
 
-// Get the time elapsed between a and b (in seconds)
+long long int get_windows_file_time_epoch(FILETIME ft) {
+    LARGE_INTEGER li = {0};
 
-double time_diff(const struct timespec * a, const struct timespec * b) {
-    return b->tv_sec - a->tv_sec + (b->tv_nsec - a->tv_nsec) / 1e9;
+    li.LowPart = ft.dwLowDateTime;
+    li.HighPart = ft.dwHighDateTime;
+
+    /* Current machine EPOCH time */
+    long long int file_time_epoch = (li.QuadPart / 10000000) - EPOCH_DIFFERENCE;
+    return file_time_epoch;
 }
+
+#endif

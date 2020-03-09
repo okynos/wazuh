@@ -951,7 +951,7 @@ void* run_dispatcher(__attribute__((unused)) void *arg) {
                 use_client_ip = 1;
             } else if(!config.flags.use_source_ip) {
                 // use_source-ip = 0 and no -I argument in agent
-                memcpy(srcip, "any", 3);
+                memcpy(srcip,"any",IPSIZE);
             }
             // else -> agent IP is already on srcip
 
@@ -1122,8 +1122,7 @@ void* run_writer(__attribute__((unused)) void *arg) {
     struct keynode *next;
     time_t cur_time;
     char wdbquery[OS_SIZE_128];
-    char wdboutput[128];
-    int wdb_sock = -1;
+    char *wdboutput;
 
     authd_sigblock();
 
@@ -1177,7 +1176,8 @@ void* run_writer(__attribute__((unused)) void *arg) {
             OS_BackupAgentInfo(cur->id, cur->name, cur->ip);
 
             snprintf(wdbquery, OS_SIZE_128, "agent %s remove", cur->id);
-            wdbc_query_ex(&wdb_sock, wdbquery, wdboutput, sizeof(wdboutput));
+            wdb_send_query(wdbquery, &wdboutput);
+            os_free(wdboutput);
 
             free(cur->id);
             free(cur->name);
@@ -1195,7 +1195,8 @@ void* run_writer(__attribute__((unused)) void *arg) {
             OS_RemoveAgentGroup(cur->id);
 
             snprintf(wdbquery, OS_SIZE_128, "agent %s remove", cur->id);
-            wdbc_query_ex(&wdb_sock, wdbquery, wdboutput, sizeof(wdboutput));
+            wdb_send_query(wdbquery, &wdboutput);
+            os_free(wdboutput);
 
             free(cur->id);
             free(cur->name);

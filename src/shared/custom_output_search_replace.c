@@ -38,7 +38,7 @@ char *searchAndReplace(const char *orig, const char *search, const char *value)
     /* Copy content before first match, if any */
     if (inx_start > 0) {
         total_bytes_allocated = inx_start + 1;
-        os_malloc(sizeof(char) * total_bytes_allocated, tmp);
+        tmp = (char *) malloc(sizeof(char) * total_bytes_allocated);
         strncpy(tmp, orig, inx_start);
         tmp_offset = inx_start;
     }
@@ -102,7 +102,7 @@ char *escape_newlines(const char *orig)
         ptr++;
     }
 
-    os_malloc (size, ret);
+    ret = (char *) malloc (size);
     ptr = orig;
     retptr = ret;
     while (*ptr) {

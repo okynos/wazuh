@@ -11,7 +11,7 @@
 
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 uname_P := $(shell sh -c 'uname -p 2>/dev/null || echo not')
-uname_R := $(shell sh -c 'uname -r 2>/dev/null || echo not')
+uname_K := $(shell sh -c 'uname -k 2>/dev/null || echo not')
 HAS_CHECKMODULE = $(shell command -v checkmodule > /dev/null && echo YES)
 HAS_SEMODULE_PACKAGE = $(shell command -v semodule_package > /dev/null && echo YES)
 
@@ -78,22 +78,26 @@ DEFINES+=-DUSER=\"${OSSEC_USER}\"
 DEFINES+=-DREMUSER=\"${OSSEC_USER_REM}\"
 DEFINES+=-DGROUPGLOBAL=\"${OSSEC_GROUP}\"
 DEFINES+=-DMAILUSER=\"${OSSEC_USER_MAIL}\"
+DEFINES+=-D${uname_S}
+
+OSSEC_CFLAGS = ${CFLAGS}
+OSSEC_LDFLAGS = ${LDFLAGS}
+OSSEC_LIBS = $(LIBS)
 
 ifneq (${TARGET},winagent)
-		DEFINES+=-D${uname_S}
 ifeq (${uname_S},Linux)
 		DEFINES+=-DINOTIFY_ENABLED -D_XOPEN_SOURCE=600 -D_GNU_SOURCE
 #		DEFINES+=-DUSE_MAGIC
 		OSSEC_CFLAGS+=-pthread -I${EXTERNAL_LIBDB}
 		OSSEC_LDFLAGS+='-Wl,-rpath,$$ORIGIN/../lib'
-		OSSEC_LIBS+=-lrt -ldl -lm
+		OSSEC_LIBS+=-lrt -ldl
 #		OSSEC_LDFLAGS+=-lmagic
 		OSSEC_LDFLAGS+=-pthread -lrt -ldl
 #		OSSEC_LDFLAGS+=-lmagic
-		OSSEC_CFLAGS+=-Wl,--start-group
+		CFLAGS+=-Wl,--start-group
 		USE_AUDIT=yes
 ifneq (,$(filter ${USE_AUDIT},YES yes y Y 1))
-		OSSEC_CFLAGS+=-I$(EXTERNAL_AUDIT)lib
+		CFLAGS+=-I$(EXTERNAL_AUDIT)lib
 endif
 else
 ifeq (${uname_S},AIX)
@@ -107,9 +111,10 @@ else
 ifeq (${uname_S},SunOS)
 		DEFINES+=-DSOLARIS
 		DEFINES+=-DHIGHFIRST
+		DEFINES+=-std=gnu99
 		DEFINES+=-D_REENTRANT
 ifneq (${uname_P},sparc)
-ifneq ($(uname_R),5.10)
+ifeq (${uname_K},5.11)
 		OSSEC_LDFLAGS+=-z relax=secadj
 else
 		OSSEC_CFLAGS+=-DMSGPACK_ZONE_ALIGN=8
@@ -227,12 +232,10 @@ ifeq (${COVERITY}, YES)
 endif
 
 OSSEC_CFLAGS+=${DEFINES}
-OSSEC_CFLAGS+=-pipe -Wall -Wextra -std=gnu99
+OSSEC_CFLAGS+=-pipe -Wall -Wextra
 OSSEC_CFLAGS+=-I./ -I./headers/ -I${EXTERNAL_OPENSSL}include -I$(EXTERNAL_JSON) -I${EXTERNAL_LIBYAML}include -I${EXTERNAL_CURL}include -I${EXTERNAL_MSGPACK}include
 
-OSSEC_CFLAGS += ${CFLAGS}
-OSSEC_LDFLAGS += ${LDFLAGS}
-OSSEC_LIBS += $(LIBS)
+
 
 CCCOLOR="\033[34m"
 LINKCOLOR="\033[34;1m"
@@ -510,7 +513,6 @@ settings:
 	@echo "    ONEWAY:             ${ONEWAY}"
 	@echo "    CLEANFULL:          ${CLEANFULL}"
 	@echo "    RESOURCES_URL:      ${RESOURCES_URL}"
-	@echo "    DISABLE_SHARED:     ${DISABLE_SHARED}"
 	@echo "User settings:"
 	@echo "    OSSEC_GROUP:        ${OSSEC_GROUP}"
 	@echo "    OSSEC_USER:         ${OSSEC_USER}"
@@ -539,7 +541,6 @@ settings:
 	@echo "Compiler:"
 	@echo "    CFLAGS            ${OSSEC_CFLAGS}"
 	@echo "    LDFLAGS           ${OSSEC_LDFLAGS}"
-	@echo "    LIBS              ${OSSEC_LIBS}"
 	@echo "    CC                ${CC}"
 	@echo "    MAKE              ${MAKE}"
 
@@ -613,7 +614,7 @@ $(SELINUX_POLICY): $(SELINUX_MODULE)
 $(SELINUX_MODULE): $(SELINUX_ENFORCEMENT)
 	checkmodule -M -m -o $@ $?
 
-test_programs = tap_wazuhdb_op tap_os_crypto tap_os_net tap_os_regex tap_shared tap_os_zlib tap_os_xml tap_fluentd_forwarder
+test_programs = tap_os_crypto tap_os_net tap_os_regex tap_shared tap_os_zlib tap_os_xml tap_fluentd_forwarder
 
 WINDOWS_BINS:=win32/ossec-agent.exe win32/ossec-agent-eventchannel.exe win32/ossec-rootcheck.exe win32/manage_agents.exe win32/setup-windows.exe win32/setup-syscheck.exe win32/setup-iis.exe win32/add-localfile.exe win32/os_win32ui.exe win32/agent-auth.exe
 
@@ -1289,14 +1290,9 @@ rootcheck.a: ${rootcheck_o_lib}
 #### syscheck ######
 
 
-syscheck_sql := syscheckd/schema_fim_db.sql
 syscheck_c := $(wildcard syscheckd/*.c)
-syschecklib_o := $(syschecklib_c:.c=.o) $(syscheck_sql:.sql=.o)
-syscheck_o := $(syschecklib_o:.c=.o) $(syscheck_c:.c=.o) $(syscheck_sql:.sql=.o)
-syscheck_eventchannel_o := $(syscheck_c:.c=-event.o) $(syscheck_sql:.sql=.o)
-
-syscheckd/schema_fim_db.o: syscheckd/schema_fim_db.sql
-	${QUIET_CC}echo 'const char *schema_fim_sql = "'"`cat $< | tr -d \"\n\"`"'";' | ${MING_BASE}${CC} ${OSSEC_CFLAGS} -xc -c -o $@ -
+syscheck_o := $(syscheck_c:.c=.o)
+syscheck_eventchannel_o := $(syscheck_c:.c=-event.o)
 
 syscheckd/%.o: syscheckd/%.c
 	${OSSEC_CC} ${OSSEC_CFLAGS} -DARGV0=\"ossec-syscheckd\" -c $^ -o $@
@@ -1534,8 +1530,7 @@ install_framework: install_python
 #### test ##########
 ####################
 
-CFLAGS_TEST=-g -O0 --coverage -DUNIT_TESTING
-LIBS_TEST=-lcmocka
+CFLAGS_TEST = -g -O0 --coverage
 
 # LIBS_TEST = -lcheck -lm -lrt -lsubunit
 
@@ -1585,9 +1580,6 @@ tap_os_xml: tests/tap_os_xml.o ${os_xml_o}
 	${OSSEC_CCBIN} ${OSSEC_LDFLAGS} $^ ${OSSEC_LIBS} -o $@
 
 tap_fluentd_forwarder: tests/tap_fluentd_forwarder.o
-	${OSSEC_CCBIN} ${OSSEC_LDFLAGS} $^ ${OSSEC_LIBS} -o $@
-
-tap_wazuhdb_op: tests/tap_wazuhdb_op.o
 	${OSSEC_CCBIN} ${OSSEC_LDFLAGS} $^ ${OSSEC_LIBS} -o $@
 
 test_valgrind: build_tests

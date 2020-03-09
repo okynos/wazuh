@@ -25,6 +25,7 @@ static volatile int state = NORMAL;
 int warn_level;
 int normal_level;
 int tolerance;
+int ms_slept;
 
 struct{
   unsigned int full:1;
@@ -39,14 +40,7 @@ static pthread_cond_t cond_no_empty;
 
 static time_t start, end;
 
-/**
- * @brief Sleep according to max_eps parameter
- *
- * Sleep (1 / max_eps) - ts_loop
- *
- * @param ts_loop Loop time.
- */
-static void delay(struct timespec * ts_loop);
+static void delay(unsigned int ms);
 
 /* Create agent buffer */
 void buffer_init(){
@@ -137,12 +131,9 @@ void *dispatch_buffer(__attribute__((unused)) void * arg){
     char normal_msg[OS_MAXSTR];
 
     char warn_str[OS_SIZE_2048];
-    struct timespec ts0;
-    struct timespec ts1;
+    int wait_ms = 1000 / agt->events_persec;
 
     while(1){
-        gettime(&ts0);
-
         w_mutex_lock(&mutex_lock);
 
         while(empty(i, j)){
@@ -192,6 +183,7 @@ void *dispatch_buffer(__attribute__((unused)) void * arg){
             mwarn(WARN_BUFFER, warn_level);
             snprintf(warn_str, OS_SIZE_2048, OS_WARN_BUFFER, warn_level);
             snprintf(warn_msg, OS_MAXSTR, "%c:%s:%s", LOCALFILE_MQ, "ossec-agent", warn_str);
+            delay(wait_ms);
             send_msg(warn_msg, -1);
         }
 
@@ -200,6 +192,7 @@ void *dispatch_buffer(__attribute__((unused)) void * arg){
             buff.full = 0;
             mwarn(FULL_BUFFER);
             snprintf(full_msg, OS_MAXSTR, "%c:%s:%s", LOCALFILE_MQ, "ossec-agent", OS_FULL_BUFFER);
+            delay(wait_ms);
             send_msg(full_msg, -1);
         }
 
@@ -208,6 +201,7 @@ void *dispatch_buffer(__attribute__((unused)) void * arg){
             buff.flood = 0;
             mwarn(FLOODED_BUFFER);
             snprintf(flood_msg, OS_MAXSTR, "%c:%s:%s", LOCALFILE_MQ, "ossec-agent", OS_FLOOD_BUFFER);
+            delay(wait_ms);
             send_msg(flood_msg, -1);
         }
 
@@ -216,26 +210,24 @@ void *dispatch_buffer(__attribute__((unused)) void * arg){
             buff.normal = 0;
             minfo(NORMAL_BUFFER, normal_level);
             snprintf(normal_msg, OS_MAXSTR, "%c:%s:%s", LOCALFILE_MQ, "ossec-agent", OS_NORMAL_BUFFER);
+            delay(wait_ms);
             send_msg(normal_msg, -1);
         }
 
+        delay(wait_ms);
         os_wait();
         send_msg(msg_output, -1);
         free(msg_output);
-
-        gettime(&ts1);
-        time_sub(&ts1, &ts0);
-        delay(&ts1);
     }
 }
 
-void delay(struct timespec * ts_loop) {
-    long interval_ns = 1000000000 / agt->events_persec;
-    struct timespec ts_timeout = { interval_ns / 1000000000, interval_ns % 1000000000 };
-    time_sub(&ts_timeout, ts_loop);
+void delay(unsigned int ms) {
+#ifdef WIN32
+    Sleep(ms);
+#else
+    struct timeval timeout = { 0, ms * 1000 };
+    select(0 , NULL, NULL, NULL, &timeout);
+#endif
 
-    if (ts_timeout.tv_sec >= 0 && ts_timeout.tv_nsec >= 0) {
-        struct timeval timeout = { ts_timeout.tv_sec, ts_timeout.tv_nsec / 1000 };
-        select(0 , NULL, NULL, NULL, &timeout);
-    }
+    ms_slept += ms;
 }

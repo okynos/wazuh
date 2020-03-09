@@ -18,7 +18,6 @@ unsigned int s_events_rootcheck_decoded = 0;
 unsigned int s_events_sca_decoded = 0;
 unsigned int s_events_hostinfo_decoded  = 0;
 unsigned int s_events_winevt_decoded = 0;
-unsigned int s_messages_dbsync_dispatched;
 unsigned int s_events_decoded = 0;
 unsigned int s_events_processed = 0;
 unsigned int s_events_dropped = 0 ;
@@ -35,7 +34,6 @@ float s_hostinfo_queue = 0;
 float s_winevt_queue = 0;
 float s_event_queue = 0;
 float s_process_event_queue = 0;
-float s_dbsync_message_queue;
 
 unsigned int s_syscheck_queue_size = 0;
 unsigned int s_syscollector_queue_size = 0;
@@ -45,7 +43,6 @@ unsigned int s_hostinfo_queue_size = 0;
 unsigned int s_winevt_queue_size = 0;
 unsigned int s_event_queue_size = 0;
 unsigned int s_process_event_queue_size = 0;
-unsigned int s_dbsync_message_queue_size;
 
 float s_writer_alerts_queue = 0;
 float s_writer_archives_queue = 0;
@@ -69,7 +66,6 @@ pthread_mutex_t s_event_dropped_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t s_alerts_written_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t s_firewall_written_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t s_fts_written_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t s_dbsync_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int interval;
 
@@ -143,10 +139,6 @@ int w_analysisd_write_state(){
         "winevt_events_decoded='%u'\n"
         "winevt_edps='%u'\n"
         "\n"
-        "# Database synchronization messages dispatched\n"
-        "dbsync_messages_dispatched='%u'\n"
-        "dbsync_mdps='%u'\n"
-        "\n"
         "# Other events decoded\n"
         "other_events_decoded='%u'\n"
         "other_events_edps='%u'\n"
@@ -206,12 +198,6 @@ int w_analysisd_write_state(){
         "# Winevt queue size\n"
         "winevt_queue_size='%u'\n"
         "\n"
-        "# Database synchronization message queue\n"
-        "dbsync_queue_usage='%.2f'\n"
-        "\n"
-        "# Database synchronization message queue size\n"
-        "dbsync_queue_size='%u'\n"
-        "\n"
         "# Event queue\n"
         "event_queue_usage='%.2f'\n"
         "\n"
@@ -262,7 +248,6 @@ int w_analysisd_write_state(){
         s_events_hostinfo_decoded / interval,
         s_events_winevt_decoded,
         s_events_winevt_decoded / interval,
-        s_messages_dbsync_dispatched, s_messages_dbsync_dispatched / interval,
         s_events_decoded,
         s_events_decoded / interval,
         s_events_processed,
@@ -284,7 +269,6 @@ int w_analysisd_write_state(){
         s_hostinfo_queue_size,
         s_winevt_queue,
         s_winevt_queue_size,
-        s_dbsync_message_queue, s_dbsync_message_queue_size,
         s_event_queue,s_event_queue_size,
         s_process_event_queue,
         s_process_event_queue_size,
@@ -345,12 +329,6 @@ void w_inc_winevt_decoded_events(){
     w_mutex_lock(&s_winevt_mutex);
     s_events_winevt_decoded++;
     w_mutex_unlock(&s_winevt_mutex);
-}
-
-void w_inc_dbsync_dispatched_messages() {
-    w_mutex_lock(&s_dbsync_mutex);
-    s_messages_dbsync_dispatched++;
-    w_mutex_unlock(&s_dbsync_mutex);
 }
 
 void w_inc_decoded_events(){
@@ -414,10 +392,6 @@ void w_reset_stats(){
     s_events_winevt_decoded = 0;
     w_mutex_unlock(&s_winevt_mutex);
 
-    w_mutex_lock(&s_dbsync_mutex)
-    s_messages_dbsync_dispatched = 0;
-    w_mutex_unlock(&s_dbsync_mutex);
-
     w_mutex_lock(&s_event_mutex);
     s_events_decoded = 0;
     w_mutex_unlock(&s_event_mutex);
@@ -444,3 +418,6 @@ void w_reset_stats(){
 
     s_events_received = 0;
 }
+
+
+

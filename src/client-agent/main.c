@@ -27,7 +27,7 @@ static void help_agentd(void) __attribute((noreturn));
 static void help_agentd()
 {
     print_header();
-    print_out("  %s: -[Vhdtf] [-u user] [-g group] [-c config]", ARGV0);
+    print_out("  %s: -[Vhdtf] [-u user] [-g group] [-c config] [-D dir]", ARGV0);
     print_out("    -V          Version and license message");
     print_out("    -h          This help message");
     print_out("    -d          Execute in debug mode. This parameter");
@@ -38,6 +38,7 @@ static void help_agentd()
     print_out("    -u <user>   User to run as (default: %s)", USER);
     print_out("    -g <group>  Group to run as (default: %s)", GROUPGLOBAL);
     print_out("    -c <config> Configuration file to use (default: %s)", DEFAULTCPATH);
+    print_out("    -D <dir>    Directory to chroot into (default: %s)", DEFAULTDIR);
     print_out(" ");
     exit(1);
 }
@@ -50,6 +51,7 @@ int main(int argc, char **argv)
     int debug_level = 0;
     agent_debug_level = getDefine_Int("agent", "debug", 0, 2);
 
+    const char *dir = DEFAULTDIR;
     const char *user = USER;
     const char *group = GROUPGLOBAL;
     const char *cfg = DEFAULTCPATH;
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
                 if (!optarg) {
                     merror_exit("-D needs an argument");
                 }
-                mwarn("-D is deprecated.");
+                dir = optarg;
                 break;
             case 'c':
                 if (!optarg) {
@@ -179,7 +181,7 @@ int main(int argc, char **argv)
     StartSIG(ARGV0);
 
     /* Agentd Start */
-    AgentdStart(uid, gid, user, group);
+    AgentdStart(dir, uid, gid, user, group);
 
     return (0);
 }
