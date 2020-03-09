@@ -77,7 +77,7 @@ void run_rk_check()
         free(rootcheck.basedir);
         rootcheck.basedir = strdup(basedir);
     } else {
-        if (rootcheck.basedir[strlen(rootcheck.basedir)-1] == PATH_SEP) {
+        if (rootcheck.basedir[strlen(rootcheck.basedir)-1] == '/') {
             rootcheck.basedir[strlen(rootcheck.basedir)-1] = '\0';
         }
     }
@@ -303,13 +303,11 @@ void * w_rootcheck_thread(__attribute__((unused)) void * args) {
     time_t prev_time_rk = 0;
     syscheck_config *syscheck = args;
 
-    sleep(syscheck->tsleep * 10);
-
     while (1) {
         int run_now = 0;
 
         /* Check if syscheck should be restarted */
-        run_now = os_check_restart_syscheck();
+        run_now = os_check_restart_rootcheck();
         curr_time = time(0);
 
         /* If time elapsed is higher than the rootcheck_time, run it */
@@ -355,4 +353,3 @@ void log_realtime_status_rk(int next) {
         }
     }
 }
-

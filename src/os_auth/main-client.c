@@ -366,6 +366,9 @@ int main(int argc, char **argv)
             exit(1);
         }
     }
+    else {
+        mwarn("Registering agent to unverified manager.");
+    }
 
     minfo("Using agent name as: %s", agentname);
 
@@ -406,7 +409,7 @@ int main(int argc, char **argv)
     }
 
     /* Append new line character */
-    strncat(buf,"\n",1);
+    strcat(buf,"\n");
     ret = SSL_write(ssl, buf, strlen(buf));
     if (ret < 0) {
         merror("SSL write error (unable to send message.)");
