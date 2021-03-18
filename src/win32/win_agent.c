@@ -49,7 +49,6 @@ void agent_help()
 /* syscheck main thread */
 void *skthread()
 {
-    minfo("Starting file integrity monitoring thread.");
 
     Start_win32_Syscheck();
 
@@ -253,13 +252,14 @@ int local_start()
     // Initialize children pool
     wm_children_pool_init();
 
-    /* Launch rotation thread */
+    /* Launch state_main thread */
+
     w_create_thread(NULL,
-                     0,
-                     (LPTHREAD_START_ROUTINE)state_main,
-                     NULL,
-                     0,
-                     (LPDWORD)&threadID);
+                    0,
+                    (LPTHREAD_START_ROUTINE)state_main,
+                    NULL,
+                    0,
+                    (LPDWORD)&threadID);
 
     /* Socket connection */
     agt->sock = -1;
@@ -292,22 +292,22 @@ int local_start()
                      (LPDWORD)&threadID);
 
     /* Launch rotation thread */
-    w_create_thread(NULL,
-                     0,
-                     (LPTHREAD_START_ROUTINE)w_rotate_log_thread,
-                     NULL,
-                     0,
-                     (LPDWORD)&threadID);
+    int rotate_log = getDefine_Int("monitord", "rotate_log", 0, 1);
+
+    if(rotate_log) {
+        w_create_thread(NULL,
+                        0,
+                        (LPTHREAD_START_ROUTINE)w_rotate_log_thread,
+                        NULL,
+                        0,
+                        (LPDWORD)&threadID);
+    }
 
     /* Check if server is connected */
     os_setwait();
     start_agent(1);
     os_delwait();
     update_status(GA_STATUS_ACTIVE);
-
-    /* Send integrity message for agent configs */
-    intcheck_file(cfg, "");
-    intcheck_file(OSSEC_DEFINES, "");
 
     req_init();
 
@@ -358,8 +358,6 @@ int SendMSG(__attribute__((unused)) int queue, const char *message, const char *
 
     tmpstr[OS_MAXSTR + 1] = '\0';
 
-    mdebug2("Attempting to send message to server.");
-
     os_wait();
 
     /* Using a mutex to synchronize the writes */
@@ -393,8 +391,6 @@ int SendMSG(__attribute__((unused)) int queue, const char *message, const char *
     } else {
         pl = locmsg;
     }
-
-    mdebug2("Sending message to server: '%s'", message);
 
     snprintf(tmpstr, OS_MAXSTR, "%c:%s:%s", loc, pl, message);
 
